@@ -1,0 +1,12 @@
+Compiling test-for-1-exp-bound.pl0
+Parsing complete
+Static semantic analysis complete
+Code generation complete
+Running ...
+200
+301
+403
+506
+
+Terminated
+No errors detected.

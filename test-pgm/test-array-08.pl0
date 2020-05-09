@@ -1,0 +1,16 @@
+const
+   N = 9;
+type
+    A = array [0..N] of array [0..N] of int;
+var 
+    r: A;
+begin
+  r[0][0] := 100;
+  r[0][9] := 101;
+  r[9][0] := 102;
+  r[9][9] := 103;
+  write r[9][9];
+  write r[9][0];
+  write r[0][9];
+  write r[0][0]
+end

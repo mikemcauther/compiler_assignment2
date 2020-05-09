@@ -1,0 +1,15 @@
+Compiling test-enfor-0-day.pl0
+Parsing complete
+Static semantic analysis complete
+Code generation complete
+Running ...
+100
+101
+102
+103
+104
+105
+106
+
+Terminated
+No errors detected.

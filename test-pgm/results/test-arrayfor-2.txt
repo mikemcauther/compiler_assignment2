@@ -1,0 +1,18 @@
+Compiling test-arrayfor-2.pl0
+Parsing complete
+Static semantic analysis complete
+Code generation complete
+Running ...
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+
+Terminated
+No errors detected.

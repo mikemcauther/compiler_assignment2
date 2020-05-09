@@ -1,0 +1,10 @@
+Compiling test-for-d-upper-maxint.pl0
+Parsing complete
+Static semantic analysis complete
+Code generation complete
+Running ...
+2147483646
+2147483647
+
+Terminated
+No errors detected.

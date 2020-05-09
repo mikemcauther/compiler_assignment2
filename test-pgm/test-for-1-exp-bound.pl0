@@ -1,0 +1,9 @@
+var
+  x: int;
+begin
+  x := 100;
+  for i: x..x+3 do
+    x := x+i;
+    write x // 200 301 403 506 
+  od
+end

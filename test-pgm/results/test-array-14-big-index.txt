@@ -1,0 +1,11 @@
+Compiling test-array-14-big-index.pl0
+Parsing complete
+Static semantic analysis complete
+Code generation complete
+Running ...
+10002
+10001
+10000
+
+Terminated
+No errors detected.

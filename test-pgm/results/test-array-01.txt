@@ -1,0 +1,11 @@
+Compiling test-array-01.pl0
+Parsing complete
+Static semantic analysis complete
+Code generation complete
+Running ...
+101
+102
+103
+
+Terminated
+No errors detected.

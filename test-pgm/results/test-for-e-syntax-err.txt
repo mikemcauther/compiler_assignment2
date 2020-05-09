@@ -1,0 +1,13 @@
+Compiling test-for-e-syntax-err.pl0
+     5   for i  100..n do // ":" missing
+******          ^  Error: PL0 syntax error
+     8   for i : 100.. do // upper bound missing
+******                 ^  Error: PL0 syntax error
+    11   for i : ..n do // lower bound missing
+******           ^  Error: PL0 syntax error
+    15     write i
+******     ^  Error: PL0 syntax error
+    19 
+****** ^  Error: PL0 unrecovered syntax error
+Parsing complete
+5 errors detected.

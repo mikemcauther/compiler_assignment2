@@ -1,0 +1,9 @@
+Compiling test-for-6-stack-leak.pl0
+Parsing complete
+Static semantic analysis complete
+Code generation complete
+Running ...
+20000
+
+Terminated
+No errors detected.

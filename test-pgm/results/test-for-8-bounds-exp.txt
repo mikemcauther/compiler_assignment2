@@ -1,0 +1,12 @@
+Compiling test-for-8-bounds-exp.pl0
+Parsing complete
+Static semantic analysis complete
+Code generation complete
+Running ...
+100
+101
+102
+103
+
+Terminated
+No errors detected.

@@ -1,0 +1,23 @@
+const
+  N = 10000;
+  M = 10002;
+type  
+  S = [N..M];
+  V = array S of int;
+var   
+  vec: V;
+  i: int;
+begin
+  i := N-1;
+  while i < M do
+  begin
+    i := i + 1;
+    vec[i] := i
+  end;
+  // i = M
+  while N <= i do
+  begin
+    write vec[i];
+    i := i - 1
+  end
+end

@@ -1,0 +1,17 @@
+Compiling test-enum-5-pred-succ.pl0
+Parsing complete
+Static semantic analysis complete
+Code generation complete
+Running ...
+106
+105
+104
+103
+102
+101
+100
+106
+100
+
+Terminated
+No errors detected.
