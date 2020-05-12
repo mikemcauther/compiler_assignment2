@@ -159,6 +159,8 @@ non terminal
                               FormalParamList;
 non terminal
                               ActualParamList;
+non terminal
+                              EnumerationList;
 non terminal List<StatementNode> StatementList;
 non terminal StatementNode    Statement,
                               CompoundStatement;
@@ -327,6 +329,10 @@ Type ::= TypeIdentifier:type
         {: 
             RESULT = type;
         :}
+    | LCURLY EnumerationList:eleli RCURLY
+        {:
+            RESULT = new EnumerationType(elelixleft, eleli, currentScope);
+        :}
     | LBRACKET:subr Constant:lo RANGE Constant:hi RBRACKET
         {:
             RESULT = new Type.SubrangeType(subrxleft, lo, hi);
@@ -345,6 +351,17 @@ TypeIdentifier ::= IDENTIFIER:id
         :}
     ;
 
+EnumerationList ::= IDENTIFIER:id
+        {:
+            RESULT = new ArrayList<Type.EnumerationElement>();
+            RESULT.add(new Type.EnumerationElement(id, idxleft));
+        :}
+    | EnumerationList:eleli COMMA IDENTIFIER:id
+        {:
+            eleli.add(new Type.EnumerationElement(id, idxleft);
+            RESULT = eleli;
+        :}
+    ;
 VarDeclSeq ::= VarDecl
     |  VarDeclSeq VarDecl
     ;
