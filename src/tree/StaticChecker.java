@@ -341,7 +341,12 @@ public class StaticChecker implements DeclVisitor, StatementVisitor,
             node.setVarEntry(((ExpNode.ArrayIndexingNode)identExp).getVarEntry());
         }
         node.setIdentExp(identExp);
-        node.setArgExp(Predefined.INTEGER_TYPE.coerceExp(argExp));
+
+        /*
+            Type indexType = new Type.SubrangeType(
+                    new ConstExp.NumberNode(t1xleft, t1, ((Type.ScalarType)t1).getLower()),
+                    new ConstExp.NumberNode(t1xleft, t1, ((Type.ScalarType)t1).getUpper()));
+        */
 
         Type identType = identExp.getType();
         if( identType instanceof Type.ReferenceType ) {
@@ -354,10 +359,16 @@ public class StaticChecker implements DeclVisitor, StatementVisitor,
                 // Error,must array type
                 staticError("must be an array type", identExp.getLocation());
             }
+
+            Type argType = ((Type.ArrayType)baseType).getArgType();
+            argExp.setType(argType);
+            ExpNode newArgExp = argType.coerceExp(argExp);
+            node.setArgExp(newArgExp);
         } else {
             //syntax error , not expected error
             staticError("Should be ReferenceType", identExp.getLocation());
         }
+
         endCheck("ArrayIndexing");
         return node;
     }
