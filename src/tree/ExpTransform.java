@@ -14,6 +14,8 @@ public interface ExpTransform<ResultType> {
 
     ResultType visitBinaryNode(ExpNode.BinaryNode node);
 
+    ResultType visitArrayIndexingNode(ExpNode.ArrayIndexingNode node);
+
     ResultType visitUnaryNode(ExpNode.UnaryNode node);
 
     ResultType visitDereferenceNode(ExpNode.DereferenceNode node);

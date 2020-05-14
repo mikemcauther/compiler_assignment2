@@ -327,6 +327,42 @@ public class StaticChecker implements DeclVisitor, StatementVisitor,
     }
 
     /**
+     * Handles array indexing 
+     */
+    public ExpNode visitArrayIndexingNode(ExpNode.ArrayIndexingNode node) {
+        beginCheck("ArrayIndexing");
+        ExpNode identExp = node.getIdentExp().transform(this);
+
+        ExpNode argExp = node.getArgExp().transform(this);
+
+        if( identExp instanceof ExpNode.VariableNode ){
+            node.setVarEntry(((ExpNode.VariableNode)identExp).getVariable());
+        } else if( identExp instanceof ExpNode.ArrayIndexingNode ){
+            node.setVarEntry(((ExpNode.ArrayIndexingNode)identExp).getVarEntry());
+        }
+        node.setIdentExp(identExp);
+        node.setArgExp(argExp);
+
+        Type identType = identExp.getType();
+        if( identType instanceof Type.ReferenceType ) {
+            // Get T of ref(T) type
+            Type baseType = ((Type.ReferenceType) identType).getBaseType();
+            if( baseType instanceof Type.ArrayType ) {
+                Type refType = new Type.ReferenceType(((Type.ArrayType)baseType).getArgType());
+                node.setType(refType);
+            } else {
+                // Error,must array type
+                staticError("must be an array type", identExp.getLocation());
+            }
+        } else {
+            //syntax error , not expected error
+            staticError("Should be ReferenceType", identExp.getLocation());
+        }
+        endCheck("ArrayIndexing");
+        return node;
+    }
+
+    /**
      * Handles unary operators - Operators can be overloaded
      */
     public ExpNode visitUnaryNode(ExpNode.UnaryNode node) {

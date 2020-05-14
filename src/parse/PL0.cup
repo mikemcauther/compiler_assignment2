@@ -328,6 +328,10 @@ Type ::= TypeIdentifier:type
         {: 
             RESULT = type;
         :}
+    | KW_ARRAY Type:t1 KW_OF Type:t2
+        {:
+            RESULT = new Type.ArrayType(t1xleft, t1, t2);
+        :}
     | LCURLY EnumerationList:eleli RCURLY
         {:
             RESULT = new Type.EnumerationType(elelixleft, eleli, currentScope);
@@ -488,6 +492,10 @@ LValue ::= IDENTIFIER:id
              * a ConstNode or a VariableNode or detected as invalid.
              */
             RESULT = new ExpNode.IdentifierNode(idxleft, id);
+        :}
+    | LValue:lvl LBRACKET Condition:c RBRACKET
+        {:
+            RESULT = new ExpNode.ArrayIndexingNode(lvlxleft, lvl, c);
         :}
     | error:e
         {:

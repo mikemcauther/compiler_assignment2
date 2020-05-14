@@ -328,6 +328,55 @@ public class CodeGenerator implements DeclVisitor, StatementTransform<Code>,
         endGen("Binary");
         return code;
     }
+
+    /**
+     * Generate code for an ArrayIndexing expression.
+     */
+    public Code visitArrayIndexingNode(ExpNode.ArrayIndexingNode node) {
+        beginGen("ArrayIndexing");
+        ExpNode identExp = node.getIdentExp();
+
+        ExpNode argExp = node.getArgExp();
+        SymEntry.VarEntry var = ((ExpNode.ArrayIndexingNode)node).getVarEntry();
+
+        int levelDiff = staticLevel - var.getLevel();
+        int offset = var.getOffset();
+        Code code = new Code();
+        if (levelDiff == 0) {
+            // Calculate Index
+            code.append(argExp.genCode(this));
+            // Load type size
+            int size = (((Type.ReferenceType) node.getType()).getBaseType()).getSpace();
+            code.genLoadConstant(size);
+            // MUL
+            code.generateOp(Operation.MPY);
+            /* A local variable, so just load the offset from the frame pointer */
+            code.genLoadConstant(offset);
+            // Add all
+            code.generateOp(Operation.ADD);
+        } else {
+            // Calculate Index
+            code.append(argExp.genCode(this));
+            // Load type size
+            int size = (((Type.ReferenceType) node.getType()).getBaseType()).getSpace();
+            code.genLoadConstant(size);
+            // MUL
+            code.generateOp(Operation.MPY);
+            /* Generate code to load the address of the frame containing the variable. */
+            code.loadFrameAddress(levelDiff);
+            // Add all
+            code.generateOp(Operation.ADD);
+            /* Add the offset of the variable to get absolute address of variable. */
+            code.genLoadConstant(offset);
+            code.generateOp(Operation.ADD);
+            /* Convert from absolute address to an address relative to the
+            * current frame pointer.
+            */
+            code.generateOp(Operation.TO_LOCAL);
+        }
+        endGen("ArrayIndexing");
+        return code;
+    }
     /**
      * Generate code for a unary operator expression.
      */

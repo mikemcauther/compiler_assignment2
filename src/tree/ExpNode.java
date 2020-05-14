@@ -259,6 +259,61 @@ public abstract class ExpNode {
     }
 
     /**
+     * Tree node for a binary operator
+     */
+    public static class ArrayIndexingNode extends ExpNode {
+        /**
+         * Arguments for operator
+         */
+        ExpNode identExp,argExp;
+        SymEntry.VarEntry variable;
+
+        public ArrayIndexingNode(Location loc, ExpNode identExp, ExpNode argExp) {
+            super(loc);
+            this.identExp = identExp;
+            this.argExp = argExp;
+        }
+
+        public ExpNode getIdentExp() {
+            return this.identExp;
+        }
+
+        public void setIdentExp(ExpNode identExp) {
+            this.identExp = identExp;
+        }
+
+        public ExpNode getArgExp() {
+            return this.argExp;
+        }
+
+        public void setArgExp(ExpNode argExp) {
+            this.argExp = argExp;
+        }
+
+        public SymEntry.VarEntry getVarEntry() {
+            return this.variable;
+        }
+        public void setVarEntry(SymEntry.VarEntry varEntry) {
+            this.variable = varEntry;
+        }
+
+        @Override
+        public ExpNode transform(ExpTransform<ExpNode> visitor) {
+            return visitor.visitArrayIndexingNode(this);
+        }
+
+        @Override
+        public Code genCode(ExpTransform<Code> visitor) {
+            return visitor.visitArrayIndexingNode(this);
+        }
+
+        @Override
+        public String toString() {
+            return "(" + this.identExp + this.argExp + ")";
+        }
+    }
+
+    /**
      * Tree node for a unary operator
      */
     public static class UnaryNode extends ExpNode {
