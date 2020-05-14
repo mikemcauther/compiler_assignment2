@@ -341,14 +341,14 @@ public class StaticChecker implements DeclVisitor, StatementVisitor,
             node.setVarEntry(((ExpNode.ArrayIndexingNode)identExp).getVarEntry());
         }
         node.setIdentExp(identExp);
-        node.setArgExp(argExp);
+        node.setArgExp(Predefined.INTEGER_TYPE.coerceExp(argExp));
 
         Type identType = identExp.getType();
         if( identType instanceof Type.ReferenceType ) {
             // Get T of ref(T) type
             Type baseType = ((Type.ReferenceType) identType).getBaseType();
             if( baseType instanceof Type.ArrayType ) {
-                Type refType = new Type.ReferenceType(((Type.ArrayType)baseType).getArgType());
+                Type refType = new Type.ReferenceType(((Type.ArrayType)baseType).getResultType());
                 node.setType(refType);
             } else {
                 // Error,must array type
