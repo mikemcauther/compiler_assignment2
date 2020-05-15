@@ -228,6 +228,62 @@ public class CodeGenerator implements DeclVisitor, StatementTransform<Code>,
         endGen("While");
         return code;
     }
+
+    /**
+     * Generate code for a "For" statement.
+     */
+    public Code visitForNode(StatementNode.ForNode node) {
+        beginGen("For");
+
+        Type varBaseType = ((Type.ReferenceType) node.getCondVar().getType()).getBaseType();
+        int size = varBaseType.getSpace();
+
+        Code condLowerCode = node.getCondLower().genCode(this);
+        Code condUpperCode = node.getCondUpper().genCode(this);
+        Code condVarCode = node.getCondVar().genCode(this);
+
+        Code condVarInit = new Code();
+        condVarInit.append(condLowerCode);
+        condVarInit.append(condVarCode);
+        condVarInit.genStore(varBaseType);
+
+        /* Generate the code for the loop body */
+        Code bodyCode = node.getLoopStmt().genCode(this);
+
+        Code condVarPlusOne = new Code();
+        condVarPlusOne.append(condVarCode);
+        condVarPlusOne.genLoad(varBaseType);
+        condVarPlusOne.genLoadConstant(1);
+        condVarPlusOne.generateOp(Operation.ADD);
+        condVarPlusOne.append(condVarCode);
+        condVarPlusOne.genStore(varBaseType);
+        bodyCode.append(condVarPlusOne);
+
+        /* Generate the code to evaluate the condition. */
+        Code codeCondLower = new Code();
+        codeCondLower.append(condLowerCode);
+        codeCondLower.append(condVarCode);
+        codeCondLower.genLoad(varBaseType);
+        codeCondLower.generateOp(Operation.LESSEQ);
+        codeCondLower.genJumpIfFalse(bodyCode.size() + Code.SIZE_JUMP_ALWAYS);
+
+        Code codeCondUpper = new Code();
+        codeCondUpper.append(condVarCode);
+        codeCondUpper.genLoad(varBaseType);
+        codeCondUpper.append(condUpperCode);
+        codeCondUpper.generateOp(Operation.LESSEQ);
+        codeCondUpper.genJumpIfFalse(bodyCode.size() + Code.SIZE_JUMP_ALWAYS + codeCondLower.size());
+
+        Code newCode = new Code();
+        newCode.append(condVarInit);
+        newCode.append(codeCondUpper);
+        newCode.append(codeCondLower);
+        newCode.append(bodyCode);
+        newCode.genJumpAlways(-(newCode.size() + Code.SIZE_JUMP_ALWAYS - condVarInit.size()));
+
+        endGen("For");
+        return newCode;
+    }
     //************* Expression node code generation visit methods
 
     /**
@@ -341,8 +397,8 @@ public class CodeGenerator implements DeclVisitor, StatementTransform<Code>,
         Code code = new Code();
         // Gen the Base Address
         code.append(identExp.genCode(this));
-        code.genLoadConstant(-1);
-        code.generateOp(Operation.ADD);
+        //code.genLoadConstant(-1);
+        //code.generateOp(Operation.ADD);
 
         // Calculate Index
         code.append(argExp.genCode(this));

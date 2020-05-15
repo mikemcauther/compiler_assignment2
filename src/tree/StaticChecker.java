@@ -233,6 +233,67 @@ public class StaticChecker implements DeclVisitor, StatementVisitor,
         endCheck("While");
     }
 
+    /**
+     * For statement node
+     */
+    public void visitForNode(StatementNode.ForNode node) {
+        beginCheck("For");
+        Scope localScope = node.getForScope();
+        localScope.addEntry(currentScope.getOwnerEntry());
+        /* Resolve all references to identifiers within the declarations. */
+        localScope.resolveScope();
+        // Enter the local scope of the procedure
+        currentScope = localScope;
+
+        // Check the condition and replace with (possibly) transformed node
+        ExpNode condVarExp = node.getCondVar().transform(this);
+        ExpNode condUpperExp = node.getCondUpper().transform(this);
+        ExpNode condLowerExp = node.getCondLower().transform(this);
+        Type scalarType = ((Type.ReferenceType) (condVarExp.getType())).getBaseType();
+
+        int upper = 0, lower = 0 , is_scalar_type = 0;
+        Type condUpperType = condUpperExp.getType();
+        Type condLowerType = condLowerExp.getType();
+
+        if( condUpperType instanceof Type.ScalarType ) {
+            scalarType = condUpperType;
+            is_scalar_type ++;
+        }
+        if( condLowerType instanceof Type.ScalarType ) {
+            scalarType = condLowerType;
+            is_scalar_type ++;
+        }
+        if( is_scalar_type == 0 ) {
+            if( !(condUpperType instanceof Type.ScalarType) && (condUpperExp instanceof ExpNode.ConstNode)) {
+                upper = ((ExpNode.ConstNode)condUpperExp).getValue();
+                is_scalar_type ++;
+            }
+            if( !(condLowerType instanceof Type.ScalarType) && (condLowerExp instanceof ExpNode.ConstNode)) {
+                lower = ((ExpNode.ConstNode)condLowerExp).getValue();
+                is_scalar_type ++;
+            }
+            if( is_scalar_type == 2 ) {
+                scalarType = new Type.ScalarType("ScalarTypeFor",1,lower, upper );
+            }
+        }
+        Type refType = new Type.ReferenceType(scalarType);
+        condVarExp.setType(refType);
+        condUpperExp.setType(scalarType);
+        condLowerExp.setType(scalarType);
+        if( condVarExp instanceof ExpNode.VariableNode ) {
+            ((ExpNode.VariableNode)condVarExp).getVariable().setReadOnly(true);
+        }
+
+
+        node.getLoopStmt().accept(this);  // Check the body of the loop
+        node.setCondVar(condVarExp);
+        node.setCondUpper(scalarType.coerceExp(condUpperExp));
+        node.setCondLower(scalarType.coerceExp(condLowerExp));
+
+        currentScope = currentScope.getParent();
+        endCheck("For");
+    }
+
     /*************************************************
      *  Expression node static checker visit methods.
      *  The static checking visitor methods for expressions

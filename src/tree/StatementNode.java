@@ -447,5 +447,78 @@ public abstract class StatementNode {
                     newLine(level + 1) + loopStmt.toString(level + 1);
         }
     }
+
+    /**
+     * Tree node representing a "for" statement.
+     */
+    public static class ForNode extends StatementNode {
+        private ExpNode condVar;
+        private ExpNode condLower;
+        private ExpNode condUpper;
+        private final StatementNode loopStmt;
+        private final Scope blockLocals;  // scope of locals within block
+
+        public ForNode(Location loc, 
+                            ExpNode condVar,
+                            ExpNode condLower,
+                            ExpNode condUpper,
+                            StatementNode loopStmt,
+                            Scope blockLocals) {
+            super(loc);
+            this.condVar = condVar;
+            this.condLower = condLower;
+            this.condUpper = condUpper;
+            this.loopStmt = loopStmt;
+            this.blockLocals = blockLocals;
+        }
+
+        @Override
+        public void accept(StatementVisitor visitor) {
+            visitor.visitForNode(this);
+        }
+
+        @Override
+        public Code genCode(StatementTransform<Code> visitor) {
+            return visitor.visitForNode(this);
+        }
+
+        public ExpNode getCondVar() {
+            return this.condVar;
+        }
+
+        public void setCondVar(ExpNode condVar) {
+            this.condVar = condVar;
+        }
+
+        public ExpNode getCondLower() {
+            return this.condLower;
+        }
+
+        public void setCondLower(ExpNode condLower) {
+            this.condLower = condLower;
+        }
+
+        public ExpNode getCondUpper() {
+            return this.condUpper;
+        }
+
+        public void setCondUpper(ExpNode condUpper) {
+            this.condUpper = condUpper;
+        }
+
+        public StatementNode getLoopStmt() {
+            return this.loopStmt;
+        }
+
+        public Scope getForScope() {
+            return blockLocals;
+        }
+
+        @Override
+        public String toString(int level) {
+            return "FOR " + condVar.toString() + " : " + condLower + " .. " + condUpper + " DO" +
+                    newLine(level + 1) + loopStmt.toString(level + 1);
+        }
+    }
 }
 
