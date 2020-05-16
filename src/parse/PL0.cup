@@ -628,5 +628,13 @@ UnaryOperator ::= MINUS
         {:
             RESULT = Operator.NEG_OP;
         :}
+    | KW_PRED
+        {:
+            RESULT = Operator.PRED_OP;
+        :}
+    | KW_SUCC
+        {:
+            RESULT = Operator.SUCC_OP;
+        :}
     ;
 

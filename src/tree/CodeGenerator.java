@@ -432,6 +432,15 @@ public class CodeGenerator implements DeclVisitor, StatementTransform<Code>,
             case NEG_OP:
                 code.generateOp(Operation.NEGATE);
                 break;
+            case PRED_OP:
+                code.genLoadConstant(1);
+                code.generateOp(Operation.ADD);
+                break;
+            case SUCC_OP:
+                code.genLoadConstant(1);
+                code.generateOp(Operation.NEGATE);
+                code.generateOp(Operation.ADD);
+                break;
             default:
                 errors.fatal("PL0 Internal error: Unknown operator",
                         node.getLocation());
