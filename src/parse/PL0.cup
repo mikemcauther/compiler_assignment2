@@ -466,7 +466,7 @@ Statement ::= KW_WHILE Condition:c KW_DO Statement:s
         {: 
             RESULT = new StatementNode.WriteNode(exleft, e);
         :}
-    |  KW_FOR IDENTIFIER:id COLON Condition:lo RANGE Condition:hi KW_DO Statement:sl KW_OD
+    |  KW_FOR IDENTIFIER:id COLON Condition:lo RANGE Condition:hi KW_DO StatementList:sl KW_OD
         {: 
             Scope localScope = currentScope.extendCurrentScope();
             localScope.addEntry(currentScope.getOwnerEntry());
@@ -476,7 +476,9 @@ Statement ::= KW_WHILE Condition:c KW_DO Statement:s
             Type.ReferenceType refType = new Type.ReferenceType(subrangeType);
 
             localScope.addVariable(id, idxleft, refType);
-            RESULT = new StatementNode.ForNode(idxleft, new ExpNode.IdentifierNode(idxleft, id), lo, hi, sl, localScope);
+
+            StatementNode.ListNode stmtListNode = new StatementNode.ListNode(slxleft,sl);
+            RESULT = new StatementNode.ForNode(idxleft, new ExpNode.IdentifierNode(idxleft, id), lo, hi, stmtListNode, localScope);
         :}
     |  LValue:lval ASSIGN Condition:rval
        {:
