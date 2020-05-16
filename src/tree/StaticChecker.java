@@ -422,7 +422,12 @@ public class StaticChecker implements DeclVisitor, StatementVisitor,
             }
 
             Type argType = ((Type.ArrayType)baseType).getArgType();
-            argExp.setType(argType);
+            if( argExp instanceof ExpNode.VariableNode ){
+                Type refType = new Type.ReferenceType(argType);
+                argExp.setType(refType);
+            }else {
+                argExp.setType(argType);
+            }
             ExpNode newArgExp = argType.coerceExp(argExp);
             node.setArgExp(newArgExp);
         } else {
