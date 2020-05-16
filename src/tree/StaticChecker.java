@@ -248,6 +248,11 @@ public class StaticChecker implements DeclVisitor, StatementVisitor,
         // Enter the local scope of the procedure
         currentScope = localScope;
 
+        int low_offset = currentScope.allocVariableSpace(1);
+        int high_offset = currentScope.allocVariableSpace(1);
+
+        node.setLowOffset(low_offset);
+        node.setHighOffset(high_offset);
         // Check the condition and replace with (possibly) transformed node
         ExpNode condVarExp = node.getCondVar().transform(this);
         node.getLoopStmt().accept(this);  // Check the body of the loop

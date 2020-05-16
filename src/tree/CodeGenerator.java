@@ -235,6 +235,8 @@ public class CodeGenerator implements DeclVisitor, StatementTransform<Code>,
     public Code visitForNode(StatementNode.ForNode node) {
         beginGen("For");
 
+        int low_offset = node.getLowOffset();
+        int high_offset = node.getHighOffset();
         Type varBaseType = ((Type.ReferenceType) node.getCondVar().getType()).getBaseType();
         int size = varBaseType.getSpace();
 
@@ -245,6 +247,12 @@ public class CodeGenerator implements DeclVisitor, StatementTransform<Code>,
         Code condVarInit = new Code();
         condVarInit.append(condLowerCode);
         condVarInit.append(condVarCode);
+        condVarInit.genStore(varBaseType);
+        condVarInit.append(condLowerCode);
+        condVarInit.genLoadConstant(low_offset);
+        condVarInit.genStore(varBaseType);
+        condVarInit.append(condUpperCode);
+        condVarInit.genLoadConstant(high_offset);
         condVarInit.genStore(varBaseType);
 
         /* Generate the code for the loop body */
@@ -261,7 +269,8 @@ public class CodeGenerator implements DeclVisitor, StatementTransform<Code>,
 
         /* Generate the code to evaluate the condition. */
         Code codeCondLower = new Code();
-        codeCondLower.append(condLowerCode);
+        codeCondLower.genLoadConstant(low_offset);
+        codeCondLower.genLoad(varBaseType);
         codeCondLower.append(condVarCode);
         codeCondLower.genLoad(varBaseType);
         codeCondLower.generateOp(Operation.LESSEQ);
@@ -270,7 +279,8 @@ public class CodeGenerator implements DeclVisitor, StatementTransform<Code>,
         Code codeCondUpper = new Code();
         codeCondUpper.append(condVarCode);
         codeCondUpper.genLoad(varBaseType);
-        codeCondUpper.append(condUpperCode);
+        codeCondUpper.genLoadConstant(high_offset);
+        codeCondUpper.genLoad(varBaseType);
         codeCondUpper.generateOp(Operation.LESSEQ);
         codeCondUpper.genJumpIfFalse(bodyCode.size() + Code.SIZE_JUMP_ALWAYS + codeCondLower.size());
 

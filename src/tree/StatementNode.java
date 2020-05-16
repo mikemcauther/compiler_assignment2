@@ -458,6 +458,8 @@ public abstract class StatementNode {
         private final StatementNode loopStmt;
         private final Scope blockLocals;  // scope of locals within block
 
+        private int low_offset;
+        private int high_offset;
         public ForNode(Location loc, 
                             ExpNode condVar,
                             ExpNode condLower,
@@ -480,6 +482,22 @@ public abstract class StatementNode {
         @Override
         public Code genCode(StatementTransform<Code> visitor) {
             return visitor.visitForNode(this);
+        }
+
+        public int getLowOffset() {
+            return this.low_offset;
+        }
+
+        public void setLowOffset(int low_offset) {
+            this.low_offset = low_offset;
+        }
+
+        public int getHighOffset() {
+            return this.high_offset;
+        }
+
+        public void setHighOffset(int high_offset) {
+            this.high_offset = high_offset;
         }
 
         public ExpNode getCondVar() {
