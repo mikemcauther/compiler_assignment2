@@ -410,18 +410,7 @@ public class StaticChecker implements DeclVisitor, StatementVisitor,
 
         ExpNode argExp = node.getArgExp().transform(this);
 
-        if( identExp instanceof ExpNode.VariableNode ){
-            node.setVarEntry(((ExpNode.VariableNode)identExp).getVariable());
-        } else if( identExp instanceof ExpNode.ArrayIndexingNode ){
-            node.setVarEntry(((ExpNode.ArrayIndexingNode)identExp).getVarEntry());
-        }
         node.setIdentExp(identExp);
-
-        /*
-            Type indexType = new Type.SubrangeType(
-                    new ConstExp.NumberNode(t1xleft, t1, ((Type.ScalarType)t1).getLower()),
-                    new ConstExp.NumberNode(t1xleft, t1, ((Type.ScalarType)t1).getUpper()));
-        */
 
         Type identType = identExp.getType();
         if( identType instanceof Type.ReferenceType ) {
@@ -458,6 +447,10 @@ public class StaticChecker implements DeclVisitor, StatementVisitor,
      */
     public ExpNode visitUnaryNode(ExpNode.UnaryNode node) {
         beginCheck("Unary");
+        // Allocate space for a hidden variable
+        int idx_offset = currentScope.allocVariableSpace(1);
+        node.setIdxOffset(idx_offset);
+
         /* Check the argument to the operator */
         ExpNode arg = node.getArg().transform(this);
         /* Lookup the operator in the symbol table to get its type */

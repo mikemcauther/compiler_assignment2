@@ -326,6 +326,8 @@ public abstract class ExpNode {
          */
         private ExpNode arg;
 
+        private int idx_offset;
+
         public UnaryNode(Location loc, Operator op, ExpNode arg) {
             super(loc);
             this.op = op;
@@ -348,6 +350,13 @@ public abstract class ExpNode {
             this.arg = arg;
         }
 
+        public int getIdxOffset() {
+            return this.idx_offset;
+        }
+
+        public void setIdxOffset(int idx_offset) {
+            this.idx_offset = idx_offset;
+        }
         @Override
         public ExpNode transform(ExpTransform<ExpNode> visitor) {
             return visitor.visitUnaryNode(this);

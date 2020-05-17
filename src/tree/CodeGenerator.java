@@ -407,11 +407,17 @@ public class CodeGenerator implements DeclVisitor, StatementTransform<Code>,
         Code code = new Code();
         // Gen the Base Address
         code.append(identExp.genCode(this));
-        //code.genLoadConstant(-1);
-        //code.generateOp(Operation.ADD);
 
         // Calculate Index
+        Type.ScalarType argType = (Type.ScalarType)argExp.getType();
+        Type varBaseType = argType;
+        int condLower = argType.getLower();
+
         code.append(argExp.genCode(this));
+        code.genLoadConstant(condLower);
+        code.generateOp(Operation.NEGATE);
+        code.generateOp(Operation.ADD);
+
         // Load type size
         int size = (((Type.ReferenceType) node.getType()).getBaseType()).getSpace();
         code.genLoadConstant(size);
@@ -433,13 +439,90 @@ public class CodeGenerator implements DeclVisitor, StatementTransform<Code>,
                 code.generateOp(Operation.NEGATE);
                 break;
             case PRED_OP:
-                code.genLoadConstant(1);
-                code.generateOp(Operation.ADD);
+
+                {
+                    Type.ScalarType argType = (Type.ScalarType)(node.getArg().getType());
+                    int idx_offset = node.getIdxOffset();
+                    Type varBaseType = argType;
+
+                    int condLower = argType.getLower();
+                    int condUpper = argType.getUpper();
+
+                    Code condVarInit = new Code();
+                    condVarInit.genLoadConstant(1);
+                    condVarInit.generateOp(Operation.NEGATE);
+                    condVarInit.generateOp(Operation.ADD);
+                    condVarInit.genLoadConstant(idx_offset);
+                    condVarInit.genStore(varBaseType);
+
+                    Code condVarPlusOne = new Code();
+                    condVarPlusOne.genLoadConstant(idx_offset);
+                    condVarPlusOne.genLoad(varBaseType);
+                    condVarPlusOne.genLoadConstant(condUpper - condLower + 1);
+                    condVarPlusOne.generateOp(Operation.ADD);
+                    condVarPlusOne.genLoadConstant(idx_offset);
+                    condVarPlusOne.genStore(varBaseType);
+
+                    /* Generate the code to evaluate the condition. */
+                    Code codeCondLower = new Code();
+                    codeCondLower.genLoadConstant(condLower);
+                    codeCondLower.genLoadConstant(idx_offset);
+                    codeCondLower.genLoad(varBaseType);
+                    codeCondLower.generateOp(Operation.LESSEQ);
+                    codeCondLower.genJumpIfFalse(Code.SIZE_JUMP_ALWAYS);
+                    codeCondLower.genJumpAlways(condVarPlusOne.size());
+
+                    Code newCode = new Code();
+                    newCode.append(condVarInit);
+                    newCode.append(codeCondLower);
+                    newCode.append(condVarPlusOne);
+                    code.append(newCode);
+                    code.genLoadConstant(idx_offset);
+                    code.genLoad(varBaseType);
+                }
                 break;
             case SUCC_OP:
-                code.genLoadConstant(1);
-                code.generateOp(Operation.NEGATE);
-                code.generateOp(Operation.ADD);
+                {
+                    Type.ScalarType argType = (Type.ScalarType)(node.getArg().getType());
+                    int idx_offset = node.getIdxOffset();
+                    Type varBaseType = argType;
+
+                    int condLower = argType.getLower();
+                    int condUpper = argType.getUpper();
+
+                    Code condVarInit = new Code();
+                    condVarInit.genLoadConstant(1);
+                    condVarInit.generateOp(Operation.ADD);
+                    condVarInit.genLoadConstant(idx_offset);
+                    condVarInit.genStore(varBaseType);
+
+                    Code condVarMiusOne = new Code();
+                    condVarMiusOne.genLoadConstant(idx_offset);
+                    condVarMiusOne.genLoad(varBaseType);
+                    condVarMiusOne.genLoadConstant(condUpper - condLower + 1);
+                    condVarMiusOne.generateOp(Operation.NEGATE);
+                    condVarMiusOne.generateOp(Operation.ADD);
+                    condVarMiusOne.genLoadConstant(idx_offset);
+                    condVarMiusOne.genStore(varBaseType);
+
+                    Code codeCondUpper = new Code();
+                    codeCondUpper.genLoadConstant(idx_offset);
+                    codeCondUpper.genLoad(varBaseType);
+                    codeCondUpper.genLoadConstant(condUpper);
+                    codeCondUpper.generateOp(Operation.LESSEQ);
+                    codeCondUpper.genJumpIfFalse(Code.SIZE_JUMP_ALWAYS);
+                    codeCondUpper.genJumpAlways(condVarMiusOne.size());
+
+                    Code newCode = new Code();
+                    newCode.append(condVarInit);
+                    newCode.append(codeCondUpper);
+                    newCode.append(condVarMiusOne);
+                    newCode.genLoadConstant(idx_offset);
+                    newCode.genLoad(varBaseType);
+                    code.append(newCode);
+                    code.genLoadConstant(idx_offset);
+                    code.genLoad(varBaseType);
+                }
                 break;
             default:
                 errors.fatal("PL0 Internal error: Unknown operator",
