@@ -266,7 +266,7 @@ public abstract class ExpNode {
          * Arguments for operator
          */
         ExpNode identExp,argExp;
-        SymEntry.VarEntry variable;
+        private int idx_offset;
 
         public ArrayIndexingNode(Location loc, ExpNode identExp, ExpNode argExp) {
             super(loc);
@@ -290,11 +290,12 @@ public abstract class ExpNode {
             this.argExp = argExp;
         }
 
-        public SymEntry.VarEntry getVarEntry() {
-            return this.variable;
+        public int getIdxOffset() {
+            return this.idx_offset;
         }
-        public void setVarEntry(SymEntry.VarEntry varEntry) {
-            this.variable = varEntry;
+
+        public void setIdxOffset(int idx_offset) {
+            this.idx_offset = idx_offset;
         }
 
         @Override

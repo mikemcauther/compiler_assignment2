@@ -406,22 +406,15 @@ public class StaticChecker implements DeclVisitor, StatementVisitor,
      */
     public ExpNode visitArrayIndexingNode(ExpNode.ArrayIndexingNode node) {
         beginCheck("ArrayIndexing");
-        ExpNode identExp = node.getIdentExp().transform(this);
 
+        ExpNode identExp = node.getIdentExp().transform(this);
         ExpNode argExp = node.getArgExp().transform(this);
 
-        if( identExp instanceof ExpNode.VariableNode ){
-            node.setVarEntry(((ExpNode.VariableNode)identExp).getVariable());
-        } else if( identExp instanceof ExpNode.ArrayIndexingNode ){
-            node.setVarEntry(((ExpNode.ArrayIndexingNode)identExp).getVarEntry());
-        }
-        node.setIdentExp(identExp);
+        // Allocate space for a hidden variable
+        int idx_offset = currentScope.allocVariableSpace(1);
+        node.setIdxOffset(idx_offset);
 
-        /*
-            Type indexType = new Type.SubrangeType(
-                    new ConstExp.NumberNode(t1xleft, t1, ((Type.ScalarType)t1).getLower()),
-                    new ConstExp.NumberNode(t1xleft, t1, ((Type.ScalarType)t1).getUpper()));
-        */
+        node.setIdentExp(identExp);
 
         Type identType = identExp.getType();
         if( identType instanceof Type.ReferenceType ) {

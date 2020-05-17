@@ -407,11 +407,73 @@ public class CodeGenerator implements DeclVisitor, StatementTransform<Code>,
         Code code = new Code();
         // Gen the Base Address
         code.append(identExp.genCode(this));
-        //code.genLoadConstant(-1);
-        //code.generateOp(Operation.ADD);
 
         // Calculate Index
-        code.append(argExp.genCode(this));
+
+        Type.ScalarType argType = (Type.ScalarType)argExp.getType();
+        int idx_offset = node.getIdxOffset();
+
+        Type varBaseType = argType;
+
+        int condLower = argType.getLower();
+        int condUpper = argType.getUpper();
+
+        Code condVarInit = new Code();
+        condVarInit.append(argExp.genCode(this));
+        condVarInit.genLoadConstant(idx_offset);
+        condVarInit.genStore(varBaseType);
+
+        /* Generate the code for the loop body */
+        Code condVarPlusOne = new Code();
+        condVarPlusOne.genLoadConstant(idx_offset);
+        condVarPlusOne.genLoad(varBaseType);
+        condVarPlusOne.genLoadConstant(condUpper - condLower + 1);
+        condVarPlusOne.generateOp(Operation.ADD);
+        condVarPlusOne.genLoadConstant(idx_offset);
+        condVarPlusOne.genStore(varBaseType);
+
+        Code condVarMiusOne = new Code();
+        condVarMiusOne.genLoadConstant(idx_offset);
+        condVarMiusOne.genLoad(varBaseType);
+        condVarMiusOne.genLoadConstant(condUpper - condLower + 1);
+        condVarMiusOne.generateOp(Operation.NEGATE);
+        condVarMiusOne.generateOp(Operation.ADD);
+        condVarMiusOne.genLoadConstant(idx_offset);
+        condVarMiusOne.genStore(varBaseType);
+        condVarMiusOne.genJumpAlways((condVarPlusOne.size()));
+
+        /* Generate the code to evaluate the condition. */
+        Code codeCondLower = new Code();
+        codeCondLower.genLoadConstant(condLower);
+        codeCondLower.genLoadConstant(idx_offset);
+        codeCondLower.genLoad(varBaseType);
+        codeCondLower.generateOp(Operation.LESSEQ);
+        codeCondLower.genJumpIfFalse(condVarMiusOne.size() + Code.SIZE_JUMP_ALWAYS);
+        codeCondLower.genJumpAlways(condVarMiusOne.size() + condVarPlusOne.size() + Code.SIZE_JUMP_ALWAYS);
+
+        Code codeCondUpper = new Code();
+        codeCondUpper.genLoadConstant(idx_offset);
+        codeCondUpper.genLoad(varBaseType);
+        codeCondUpper.genLoadConstant(condUpper);
+        codeCondUpper.generateOp(Operation.LESSEQ);
+        codeCondUpper.genJumpIfFalse(codeCondLower.size());
+
+        Code newCode = new Code();
+        newCode.append(condVarInit);
+        newCode.append(codeCondUpper);
+        newCode.append(codeCondLower);
+        newCode.append(condVarMiusOne);
+        newCode.append(condVarPlusOne);
+        newCode.genJumpAlways(-(newCode.size() + Code.SIZE_JUMP_ALWAYS - condVarInit.size()));
+
+        code.append(newCode);
+        // Load corredted idx value
+        code.genLoadConstant(idx_offset);
+        code.genLoad(varBaseType);
+        code.genLoadConstant(condLower);
+        code.generateOp(Operation.NEGATE);
+        code.generateOp(Operation.ADD);
+
         // Load type size
         int size = (((Type.ReferenceType) node.getType()).getBaseType()).getSpace();
         code.genLoadConstant(size);
